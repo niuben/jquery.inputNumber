@@ -16,6 +16,8 @@
         $el: null, // input element
         $wrap: null, //div wrapper element
 
+        handle: null, //timer handle
+
         options: null,
         defaults: {
             negative: true,
@@ -45,34 +47,25 @@
                 self = this;
 
             this.$wrap
-            .delegate('a.'+opts.downClass,'click',function(e){
-                var defVal = parseInt(self.$el.val()) || 0,
-                    curVal = --defVal;
-
-                    console.log(curVal);
-
-                if(!opts.negative) {
-                    if(curVal >= 0) self.$el.val(curVal);
-                } else {
-                    self.$el.val(curVal);
-                }
-                    
-                e.preventDefault();
+            .delegate('a.'+opts.downClass,'mousedown',function(e){
+                self.reduce(e);
+                self.handle = setInterval(function(){
+                    self.reduce(e);
+                }, 200);
             })
-            .delegate('a.'+opts.upClass,'click',function(e){
-                var defVal = parseInt(self.$el.val()) || 0,
-                    curVal = ++defVal;
-
-                    console.log(curVal);
-
-                if(!opts.positive) {
-                    if(curVal <= 0) self.$el.val(curVal);
-                } else {
-                    self.$el.val(curVal);
-                }
-                    
-                e.preventDefault();
+            .delegate('a.'+opts.downClass,'mouseup',function(e){
+                clearInterval(self.handle);
+            })
+            .delegate('a.'+opts.upClass,'mousedown',function(e){
+                self.add(e);
+                self.handle = setInterval(function(){
+                    self.add(e);
+                }, 200);
+            })
+            .delegate('a.'+opts.upClass, 'mouseup', function(e){
+                clearInterval(self.handle);
             });
+            ;
 
             this.$el
             .on('change',function(e){
@@ -95,7 +88,36 @@
                     
             });
 
+        },
+        reduce: function(e){
+            var opts = this.options;
+            var defVal = parseInt(this.$el.val()) || 0,
+            curVal = --defVal;
+
+            if(!opts.negative) {
+                if(curVal >= 0) this.$el.val(curVal);
+            } else {
+                this.$el.val(curVal);
+            }                
+            e.preventDefault();
+        },
+        add: function(e){
+            var opts = this.options;
+            var defVal = parseInt(this.$el.val()) || 0,
+            curVal = ++defVal;
+
+                console.log(curVal);
+
+            if(!opts.positive) {
+                if(curVal <= 0) this.$el.val(curVal);
+            } else {
+                this.$el.val(curVal);
+            }
+                
+            e.preventDefault();
+
         }
+
 
     };
 
